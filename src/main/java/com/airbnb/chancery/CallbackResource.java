@@ -29,7 +29,7 @@ public class CallbackResource {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public Response receiveHook(@QueryParam("challenge") String attempt,
-                              @FormParam("payload") String raw) throws IOException {
+                                @FormParam("payload") String raw) throws IOException {
         log.trace("Received {}", raw);
 
         final CallbackPayload payload = mapper.readValue(raw, CallbackPayload.class);

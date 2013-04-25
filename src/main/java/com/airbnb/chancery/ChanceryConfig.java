@@ -1,7 +1,6 @@
 package com.airbnb.chancery;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yammer.dropwizard.client.HttpClientConfiguration;
 import com.yammer.dropwizard.client.JerseyClientConfiguration;
 import com.yammer.dropwizard.config.Configuration;
 import lombok.Getter;
