@@ -1,11 +1,13 @@
 package com.airbnb.chancery.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Commit {
     @JsonProperty
     private /* final */ String url;
