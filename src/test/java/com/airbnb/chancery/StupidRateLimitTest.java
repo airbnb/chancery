@@ -16,6 +16,6 @@ public class StupidRateLimitTest {
         StupidRateLimitTest.log.info("Rate limiting data: {}", data);
         Assert.assertTrue(data.getLimit() > 10);
         Assert.assertTrue(data.getRemaining() > 10);
-        Assert.assertTrue(data.getRemaining() >= data.getLimit());
+        Assert.assertTrue(data.getRemaining() <= data.getLimit());
     }
 }
