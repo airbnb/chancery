@@ -7,11 +7,9 @@ import com.yammer.metrics.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -22,6 +20,7 @@ public class CallbackResource {
     private final AmazonS3Client s3Client;
     private final String bucket;
     private final GithubClient ghClient;
+    private final String challenge;
     private final ObjectKeyEvaluator objectKeyEvaluator;
     private final UpdateFilter updateFilter;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -29,11 +28,23 @@ public class CallbackResource {
     @Timed
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String receiveHook(@FormParam("payload") String raw) throws IOException {
+    public Response receiveHook(@QueryParam("challenge") String attempt,
+                              @FormParam("payload") String raw) throws IOException {
         log.trace("Received {}", raw);
-        final CallbackPayload payload = mapper.readValue(raw, CallbackPayload.class);
 
+        final CallbackPayload payload = mapper.readValue(raw, CallbackPayload.class);
         log.trace("Decoded to {}", payload);
+
+        if (challenge == null) {
+            log.trace("Empty challenge");
+        } else if (!challenge.equals(attempt)) {
+            log.warn("Challenge attempt {} doesn't match {}, ditching request", attempt, challenge);
+            return Response.status(Response.Status.FORBIDDEN).entity("failed challenge").build();
+
+        } else {
+            log.info("Passed challenge");
+        }
+
         if (updateFilter.shouldUpdate(payload)) {
             if (payload.isDeleted())
                 delete(payload);
@@ -43,7 +54,7 @@ public class CallbackResource {
             log.info("Not updating");
         }
 
-        return "OK";
+        return Response.ok().build();
     }
 
     private void update(CallbackPayload payload) throws IOException {

@@ -41,6 +41,8 @@ public class ChanceryService extends Service<ChanceryConfig> {
         env.addHealthCheck(new S3ClientHealthCheck(s3Client, s3Bucket));
         env.addHealthCheck(new GithubClientHealthCheck(ghClient));
 
-        env.addResource(new CallbackResource(s3Client, s3Bucket, ghClient, objectKeyEvaluator, filter));
+        env.addResource(new CallbackResource(s3Client, s3Bucket,
+                ghClient, config.getUriChallenge(),
+                objectKeyEvaluator, filter));
     }
 }

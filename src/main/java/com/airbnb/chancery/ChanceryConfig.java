@@ -26,6 +26,10 @@ public class ChanceryConfig extends Configuration {
     @Getter
     private String githubOauth2Token;
 
+    @JsonProperty
+    @Getter
+    private String uriChallenge;
+
     @NotEmpty
     @JsonProperty
     @Getter

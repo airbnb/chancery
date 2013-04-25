@@ -53,6 +53,9 @@ A few things to note:
 3. Chancery asks Github for the tarball corresponding to the commit ID provided indicated
    in the Github callback, not the reference name.
 
+4. A trivial security mechanism is offered. If `uriChallenge` is configured,
+   incoming queries will be rejected unless they their `challenge` parameter matches.
+
 ## Set it up (one-time operation)
 
 ### Prepare credentials
@@ -104,8 +107,8 @@ Here is a straightforward example for our story:
     awsAccessKeyID: XXXXXXXXXXXXXXXXXXXX
     awsSecretKey: YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
     githubOauth2Token: 1234567890abcdef1234567890abcdef12345678
-    
-    # We'll explain those in the next section.
+    uriChallenge: iamreallygithub
+
     bucketName: superstore.acme.com
     objectPathTemplate: repos/@{repository.name}/@{ref}
     repoRefPattern: "https://github.com/acme/project-(manhattan|brooklyn):refs/heads/prod/.*"
@@ -147,7 +150,7 @@ You'll need to create the Github web hooks with your own user, as the
     $ curl --silent --fail --request POST \
         -H 'Content-Type: application/json' \
         --data '{"name": "web", "active": true, "config": {
-                   "url": "https://chancery.ewr.corp.acme.com/callback",
+                   "url": "https://chancery.ewr.corp.acme.com/callback?challenge=iamreallygithub",
                    "content_type": "json"}}' \
         --user 'acme-root:god' \
         'https://api.github.com/repos/acme/project-manhattan/hooks'
