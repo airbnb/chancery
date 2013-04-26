@@ -30,13 +30,13 @@ public class CallbackResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response receiveHook(@QueryParam("challenge") String attempt,
                                 @FormParam("payload") String raw) throws IOException {
-        log.trace("Received {}", raw);
+        log.debug("Received {}", raw);
 
         final CallbackPayload payload = mapper.readValue(raw, CallbackPayload.class);
-        log.trace("Decoded to {}", payload);
+        log.debug("Decoded to {}", payload);
 
         if (challenge == null) {
-            log.trace("Empty challenge");
+            log.debug("Empty challenge");
         } else if (!challenge.equals(attempt)) {
             log.warn("Challenge attempt {} doesn't match {}, ditching request", attempt, challenge);
             return Response.status(Response.Status.FORBIDDEN).entity("failed challenge").build();
