@@ -3,6 +3,8 @@ package com.airbnb.chancery;
 import com.airbnb.chancery.model.CallbackPayload;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yammer.metrics.annotation.ExceptionMetered;
+import com.yammer.metrics.annotation.Metered;
 import com.yammer.metrics.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,9 @@ public class CallbackResource {
     private final UpdateFilter updateFilter;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Timed
+    @Timed(name = "receiveHook")
+    @Metered
+    @ExceptionMetered
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public Response receiveHook(@QueryParam("challenge") String attempt,
@@ -77,6 +81,9 @@ public class CallbackResource {
         }
     }
 
+    @Timed(name = "githubDelete")
+    @Metered
+    @ExceptionMetered
     private void delete(CallbackPayload payload) {
         log.info("Reference deleted, removing corresponding object");
         final String key = objectKeyEvaluator.getPath(payload);
@@ -91,6 +98,9 @@ public class CallbackResource {
         log.info("Deleted {}", key);
     }
 
+    @Metered
+    @ExceptionMetered
+    @Timed(name = "s3Upload")
     private void upload(File src, String key) {
         log.info("Uploading {} to {}", src, key);
         try {
