@@ -66,7 +66,7 @@ public class CallbackResource {
         path = ghClient.download(
                 payload.getRepository().getOwner().getName(),
                 payload.getRepository().getName(),
-                payload.getHeadCommit().getId());
+                payload.getAfter());
 
         upload(path.toFile(), key);
 
