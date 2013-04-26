@@ -2,6 +2,7 @@ package com.airbnb.chancery;
 
 import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.yammer.metrics.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,9 +64,21 @@ public class GithubClient {
     public Path download(String owner, String repository, String id) throws IOException {
         final Path tempPath = Files.createTempFile("com.airbnb.chancery", null);
         tempPath.toFile().deleteOnExit();
-        final InputStream inputStream = resource.uri(UriBuilder.fromPath("/repos/{a}/{b}/tarball/{c}").
-                build(owner, repository, id)).accept(MediaType.WILDCARD_TYPE).get(InputStream.class);
+
+        final URI downloadURI = UriBuilder.
+                fromPath("/repos/{a}/{b}/tarball/{c}").
+                build(owner, repository, id);
+
+        log.info("Downloading {}", downloadURI);
+
+        final InputStream inputStream = resource.uri(downloadURI).
+                accept(MediaType.WILDCARD_TYPE).
+                get(InputStream.class);
+
         Files.copy(inputStream, tempPath, StandardCopyOption.REPLACE_EXISTING);
+
+        log.info("Downloaded {}", downloadURI);
+
         return tempPath;
     }
 }

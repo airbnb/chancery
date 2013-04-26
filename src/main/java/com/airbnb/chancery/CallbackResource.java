@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -60,30 +61,14 @@ public class CallbackResource {
     private void update(CallbackPayload payload) throws IOException {
         final String key = objectKeyEvaluator.getPath(payload);
 
-        log.info("Downloading for {}", key);
-
         final java.nio.file.Path path;
 
-        try {
-            path = ghClient.download(
-                    payload.getRepository().getOwner().getName(),
-                    payload.getRepository().getName(),
-                    payload.getHeadCommit().getId());
-        } catch (IOException e) {
-            log.error("Couldn't download for {}", key, e);
-            throw e;
-        }
+        path = ghClient.download(
+                payload.getRepository().getOwner().getName(),
+                payload.getRepository().getName(),
+                payload.getHeadCommit().getId());
 
-        log.info("Uploading to {}", key);
-
-        try {
-            s3Client.putObject(bucket, key, path.toFile());
-        } catch (Exception e) {
-            log.error("Couldn't upload to {}", key, e);
-            throw e;
-        }
-
-        log.info("Uploaded to {}", key);
+        upload(path.toFile(), key);
 
         try {
             Files.delete(path);
@@ -104,5 +89,16 @@ public class CallbackResource {
         }
 
         log.info("Deleted {}", key);
+    }
+
+    private void upload(File src, String key) {
+        log.info("Uploading {} to {}", src, key);
+        try {
+            s3Client.putObject(this.bucket, key, src);
+        } catch (Exception e) {
+            log.error("Couldn't upload to {}", key, e);
+            throw e;
+        }
+        log.info("Uploaded to {}", key);
     }
 }
