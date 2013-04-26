@@ -113,16 +113,18 @@ Here is a straightforward example for our story:
     objectPathTemplate: repos/@{repository.name}/@{ref}
     repoRefPattern: "https://github.com/acme/project-(manhattan|brooklyn):refs/heads/prod/.*"
     
+    # Github can be very, very slow
     githubHttpConfig:
-      timeout: 5s
-      connectionTimeout: 1s
+      timeout: 20s
+      connectionTimeout: 10s
       maxConnectionsPerRoute: 16
       keepAlive: 60s
     
+    # Log ALL before opening an issue please
     logging:
       console:
         enabled: true
-        threshold: INFO
+        threshold: ALL
 
 ## Run it
 
