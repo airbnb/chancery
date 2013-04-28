@@ -31,31 +31,36 @@ public class CallbackResource {
     @Metered
     @ExceptionMetered
     @Timed(name = "receiveHook")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response receiveHook(@HeaderParam("X-Hub-Signature") String signature,
                                 String payload)
             throws IOException, GithubFailure.forDownload {
-        log.debug("Received {}", payload);
+        CallbackResource.log.debug("Received {}", payload);
 
-        final CallbackPayload decodedPayload = mapper.readValue(payload, CallbackPayload.class);
+        CallbackPayload decodedPayload;
+
+        try {
+            decodedPayload = mapper.readValue(payload, CallbackPayload.class);
+        } catch (Exception e) {
+            log.warn("Couldn't parse payload {}", payload, e);
+            throw new WebApplicationException(e, Response.Status.BAD_REQUEST);
+        }
+
         log.debug("Decoded to {}", decodedPayload);
 
         decodedPayload.setTimestamp(new DateTime());
 
-        if (checker != null) {
-            final boolean authenticated = checker.checkSignature(signature, payload);
+        if (checker != null && !checker.checkSignature(signature, payload))
+            return Response.
+                    status(Response.Status.FORBIDDEN).
+                    build();
+        else
+            callbackBus.post(decodedPayload);
 
-            if (!authenticated)
-                return Response.
-                        status(Response.Status.FORBIDDEN).
-                        build();
-        }
+        return Response.ok().build();
+    }
 
-        callbackBus.post(decodedPayload);
-
-        return Response.
-                status(Response.Status.ACCEPTED).
-                build();
+    private static class InvalidPayloadException extends Exception {
     }
 }

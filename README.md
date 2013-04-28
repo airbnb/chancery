@@ -64,7 +64,7 @@ and/or tags of which repositories should be acted upon.
    for the syntax.
 
    A lot of information from the hook is usable there; please look at the sources
-   of `CallbackPayload` or the Chancery logs.
+   of `CallbackPayload` or the Chancery debug logs.
 
    We added a `timestamp` attribute that matches when Chancery received the callback,
    and Joda Time's `ISODateTimeFormat` class is exposed as `iso`, `DateTimeFormat` as `dtf`.

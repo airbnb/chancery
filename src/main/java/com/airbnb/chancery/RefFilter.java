@@ -5,15 +5,15 @@ import lombok.NonNull;
 
 import java.util.regex.Pattern;
 
-public class UpdateFilter {
+public class RefFilter {
     @NonNull
     private final Pattern pattern;
 
-    UpdateFilter(String repoRefPattern) {
+    RefFilter(String repoRefPattern) {
         pattern = Pattern.compile(repoRefPattern);
     }
 
-    public boolean shouldUpdate(CallbackPayload payload) {
+    public boolean matches(CallbackPayload payload) {
         return pattern.matcher(format(payload)).matches();
     }
 

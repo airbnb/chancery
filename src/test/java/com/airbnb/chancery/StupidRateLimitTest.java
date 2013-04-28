@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 @Slf4j
 public class StupidRateLimitTest {
     @Test
-    public void testRateLimit() throws URISyntaxException {
+    public void testRateLimit() throws URISyntaxException, GithubFailure.forRateLimit {
         final GithubClient client = new GithubClient(new Client(), null);
         final RateLimitStats data = client.getRateLimitData();
         StupidRateLimitTest.log.info("Rate limiting data: {}", data);
