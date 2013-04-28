@@ -1,10 +1,12 @@
 package com.airbnb.chancery;
 
 import com.airbnb.chancery.model.CallbackPayload;
+import lombok.NonNull;
 
 import java.util.regex.Pattern;
 
 public class UpdateFilter {
+    @NonNull
     private final Pattern pattern;
 
     UpdateFilter(String repoRefPattern) {

@@ -1,18 +1,18 @@
-package com.airbnb.chancery;
+package com.airbnb.chancery.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class GithubRateLimitData {
+public class RateLimitStats {
     @JsonProperty
     int limit;
     @JsonProperty
     int remaining;
 
     @Data
-    static class Container {
+    public static class Container {
         @JsonProperty
-        GithubRateLimitData rate;
+        RateLimitStats rate;
     }
 }

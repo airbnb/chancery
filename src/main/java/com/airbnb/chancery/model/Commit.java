@@ -1,8 +1,8 @@
 package com.airbnb.chancery.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 

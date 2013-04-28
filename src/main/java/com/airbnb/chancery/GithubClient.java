@@ -1,11 +1,13 @@
 package com.airbnb.chancery;
 
+import com.airbnb.chancery.model.RateLimitStats;
+import com.airbnb.chancery.model.ReferenceCreationRequest;
 import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.api.client.filter.LoggingFilter;
-import com.yammer.metrics.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -20,7 +22,7 @@ import java.nio.file.StandardCopyOption;
 public class GithubClient {
     private final WebResource resource;
 
-    GithubClient(final Client client, final String oAuth2Token) {
+    GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {
         client.setFollowRedirects(true);
 
         resource = client.resource("https://api.github.com/");
@@ -28,15 +30,15 @@ public class GithubClient {
         resource.addFilter(new ClientFilter() {
             @Override
             public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
+                /* Github API *requires* this */
                 cr.getHeaders().putSingle("User-Agent", "chancery by pierre@gcarrier.fr");
                 return getNext().handle(cr);
             }
         });
 
         if (oAuth2Token != null && !oAuth2Token.isEmpty()) {
+            final String authValue = "token " + oAuth2Token;
             resource.addFilter(new ClientFilter() {
-                private final String authValue = "token " + oAuth2Token;
-
                 @Override
                 public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
                     cr.getHeaders().putSingle("Authorization", authValue);
@@ -48,37 +50,58 @@ public class GithubClient {
         }
     }
 
-    @Timed(name = "github-rate-limit-pull")
-    public GithubRateLimitData getRateLimitData() {
+    public RateLimitStats getRateLimitData()
+            throws GithubFailure.forRateLimit {
         try {
             return resource.uri(new URI("/rate_limit")).
                     accept(MediaType.APPLICATION_JSON_TYPE).
-                    get(GithubRateLimitData.Container.class).getRate();
+                    get(RateLimitStats.Container.class).getRate();
         } catch (URISyntaxException e) {
-            /* no really? */
-            return null;
+            return null; /* mkay? */
+        } catch (UniformInterfaceException e) {
+            throw new GithubFailure.forRateLimit(e);
         }
     }
 
-    @Timed(name = "github-download")
-    public Path download(String owner, String repository, String id) throws IOException {
+    public void createReference(String owner, String repository, String ref, String id)
+            throws GithubFailure.forRateLimit {
+        final URI uri = UriBuilder.
+                fromPath("/repos/{a}/{b}/git/{c}").
+                build(owner, repository, ref);
+
+        final ReferenceCreationRequest req = new ReferenceCreationRequest(ref, id);
+
+        try {
+            resource.uri(uri).
+                    accept(MediaType.APPLICATION_JSON_TYPE).
+                    entity(req, MediaType.APPLICATION_JSON_TYPE).
+                    post(ReferenceCreationRequest.class);
+        } catch (UniformInterfaceException e) {
+            throw new GithubFailure.forRateLimit(e);
+        }
+    }
+
+    public Path download(String owner, String repository, String id)
+            throws IOException, GithubFailure.forDownload {
         final Path tempPath = Files.createTempFile("com.airbnb.chancery", null);
         tempPath.toFile().deleteOnExit();
 
-        final URI downloadURI = UriBuilder.
+        final URI uri = UriBuilder.
                 fromPath("/repos/{a}/{b}/tarball/{c}").
                 build(owner, repository, id);
 
-        log.info("Downloading {}", downloadURI);
+        log.info("Downloading {}", uri);
 
-        final InputStream inputStream = resource.uri(downloadURI).
-                accept(MediaType.WILDCARD_TYPE).
-                get(InputStream.class);
+        try {
+            final InputStream inputStream = resource.uri(uri).
+                    accept(MediaType.WILDCARD_TYPE).
+                    get(InputStream.class);
 
-        Files.copy(inputStream, tempPath, StandardCopyOption.REPLACE_EXISTING);
-
-        log.info("Downloaded {}", downloadURI);
-
-        return tempPath;
+            Files.copy(inputStream, tempPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("Downloaded {}", uri);
+            return tempPath;
+        } catch (UniformInterfaceException e) {
+            throw new GithubFailure.forDownload(e);
+        }
     }
 }

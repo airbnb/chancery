@@ -1,8 +1,10 @@
 package com.airbnb.chancery.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.joda.time.DateTime;
 
 import java.util.List;
 
@@ -31,4 +33,6 @@ public class CallbackPayload {
     private /* final */ Commit headCommit;
     @JsonProperty
     private /* final */ List<Commit> commits;
+    @JsonIgnore
+    private /* final */ DateTime timestamp;
 }

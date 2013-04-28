@@ -10,40 +10,42 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class ChanceryConfig extends Configuration {
+    /* Needed */
     @NotEmpty
     @JsonProperty
     @Getter
-    private String awsAccessKeyID;
-
-    @NotEmpty
-    @JsonProperty
-    @Getter
-    private String awsSecretKey;
+    private int handlerThreads = 16;
 
     @NotEmpty
     @JsonProperty
     @Getter
     private String githubOauth2Token;
 
+    /* Optional */
+    @JsonProperty
+    private Getter githubSecret;
+
+    /* S3-related */
     @JsonProperty
     @Getter
-    private String uriChallenge;
+    private String awsAccessKeyID;
+    @JsonProperty
+    @Getter
+    private String awsSecretKey;
 
+    /* TODO: move */
     @NotEmpty
     @JsonProperty
     @Getter
     private String bucketName;
-
     @NotEmpty
     @JsonProperty
     @Getter
     private String objectPathTemplate;
-
     @NotEmpty
     @JsonProperty
     @Getter
     private String repoRefPattern;
-
     @Valid
     @NotNull
     @JsonProperty

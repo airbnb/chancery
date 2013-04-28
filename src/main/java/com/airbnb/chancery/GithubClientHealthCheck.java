@@ -1,5 +1,6 @@
 package com.airbnb.chancery;
 
+import com.airbnb.chancery.model.RateLimitStats;
 import com.yammer.metrics.core.HealthCheck;
 
 public class GithubClientHealthCheck extends HealthCheck {
@@ -12,7 +13,7 @@ public class GithubClientHealthCheck extends HealthCheck {
 
     @Override
     protected Result check() throws Exception {
-        final GithubRateLimitData data = client.getRateLimitData();
+        final RateLimitStats data = client.getRateLimitData();
         final float ratio = (float) data.getRemaining() / (float) data.getLimit();
         if (ratio < 0.5)
             return Result.unhealthy("Running low on API quota: %d/%d (%.2f%%) left",
