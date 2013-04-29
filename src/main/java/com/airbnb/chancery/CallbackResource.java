@@ -25,6 +25,7 @@ public class CallbackResource {
     private final GithubAuthChecker checker;
     @NonNull
     private final EventBus callbackBus;
+    @NonNull
     private final ObjectMapper mapper = new ObjectMapper();
 
     @ExceptionMetered

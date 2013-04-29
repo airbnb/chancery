@@ -22,7 +22,9 @@ import java.nio.file.StandardCopyOption;
 
 @Slf4j
 public class GithubClient {
+    @NotNull
     private final WebResource resource;
+    @NotNull
     private final ObjectMapper mapper = new ObjectMapper();
 
     GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {

@@ -8,6 +8,7 @@ import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
 import lombok.Getter;
+import lombok.NonNull;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,11 @@ import java.util.concurrent.TimeUnit;
 public abstract class FilteringSubscriber {
     @Getter
     private final RefFilter filter;
-    private final Meter exceptionMeter, filteredOutMeter;
+    @NonNull
+    private final Meter exceptionMeter;
+    @NonNull
+    private final Meter filteredOutMeter;
+    @NonNull
     private final Timer handledTimer;
 
     protected FilteringSubscriber(String filter) {
