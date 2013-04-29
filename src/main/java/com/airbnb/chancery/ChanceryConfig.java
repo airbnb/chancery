@@ -14,25 +14,26 @@ import java.util.List;
 
 public class ChanceryConfig extends Configuration {
     /* Needed */
+    @Getter
     @NotEmpty
     @JsonProperty
-    @Getter
     private int handlerThreads = 16;
 
+    @Getter
     @NotEmpty
     @JsonProperty
-    @Getter
     private String githubOauth2Token;
 
     /* Optional */
-    @JsonProperty
     @Getter
+    @Nullable
+    @JsonProperty
     private String githubSecret;
 
     /* S3-related */
+    @Getter
     @Nullable
     @JsonProperty
-    @Getter
     private String awsAccessKeyID;
 
     @Nullable
@@ -41,20 +42,19 @@ public class ChanceryConfig extends Configuration {
     private String awsSecretKey;
 
     /* Handlers */
+    @Getter
     @Nullable
     @JsonProperty
-    @Getter
     private List<S3ArchiverConfig> s3Archives;
 
+    @Getter
     @Nullable
     @JsonProperty
-    @Getter
     private List<RefLoggerConfig> refLogs;
 
-    @Valid
-    @NotNull
-    @JsonProperty
     @Getter
+    @Valid
+    @JsonProperty
     private JerseyClientConfiguration githubHttpConfig =
             new JerseyClientConfiguration();
 

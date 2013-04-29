@@ -6,12 +6,13 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 public class RefLoggerConfig extends Configuration {
+    @Getter
     @NotEmpty
     @JsonProperty
-    @Getter
     private String refFilter;
+
+    @Getter
     @NotEmpty
     @JsonProperty
-    @Getter
     private String refTemplate;
 }
