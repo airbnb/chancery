@@ -38,7 +38,7 @@ public class S3Archiver {
 
     @Subscribe
     @AllowConcurrentEvents
-    private void receiveCallback(@NotNull CallbackPayload payload)
+    public void receiveCallback(@NotNull CallbackPayload payload)
             throws IOException, GithubFailure.forDownload {
         if (!refFilter.matches(payload))
             return;
