@@ -25,6 +25,7 @@ Chancery hears when you push to Github, and allows you to…
     - [Monitor it](#monitor-it)
 - [Install a web hook (needed for every repository)](#install-a-web-hook-needed-for-every-repository)
 - [Contribute](#contribute)
+    - [Local development](#local-development)
 
 ## What it does ##
 
@@ -206,3 +207,34 @@ matches your particular needs.
 
 Open issues, send pull requests, share your love with
 [@AirbnbNerds](https://twitter.com/AirbnbNerds) on Twitter!
+
+### Local development ###
+
+Live-testing Github callbacks from your development machine could be a bit painful.
+Here is a trick.
+
+- On your publicly-accessible `server.acme.com`, make sure you allow gateway ports:
+
+        Match User johndoe
+            GatewayPorts yes
+
+  Restart `sshd` if needed.
+
+- From your laptop, run:
+
+        laptop$ ssh -vNR 9000:localhost:8080 server.acme.com
+
+  Note that the `9000` port needs to be reachable from the outside on
+  `server.acme.com`, but you do not need to open your laptop firewall as
+  connections will come through the loopback interface.
+
+- On your laptop, fire up a logging HTTP server, check that it receives requests:
+
+        $ python -mSimpleHTTPServer 8080 &
+        [1] 32430
+        Serving HTTP on 0.0.0.0 port 8080 ...
+        $ curl -sf http://server.acme.com:9000/ >/dev/null
+        127.0.0.1 - - [29/Apr/2013 02:08:48] "GET / HTTP/1.1" 200 -
+        $ kill %%
+
+- You can now ask Github to send callbacks to `http://server.acme.com:9000/`.
