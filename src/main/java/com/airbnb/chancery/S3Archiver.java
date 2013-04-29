@@ -11,12 +11,10 @@ import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
-/* TODO: some metrics */
 @Slf4j
-public class S3Archiver {
-    @NonNull
-    private final RefFilter refFilter;
+public class S3Archiver extends FilteringSubscriber {
     @NonNull
     private final AmazonS3Client s3Client;
     @NonNull
@@ -29,30 +27,25 @@ public class S3Archiver {
     public S3Archiver(@NotNull S3ArchiverConfig config,
                       @NotNull AmazonS3Client s3Client,
                       @NotNull GithubClient ghClient) {
+        super(config.getRefFilter());
         this.s3Client = s3Client;
         this.ghClient = ghClient;
         bucketName = config.getBucketName();
-        refFilter = new RefFilter(config.getRefFilter());
         keyTemplate = new PayloadExpressionEvaluator(config.getKeyTemplate());
     }
 
-    @Subscribe
-    @AllowConcurrentEvents
-    public void receiveCallback(@NotNull CallbackPayload payload)
-            throws IOException, GithubFailure.forDownload {
-        if (!refFilter.matches(payload))
-            return;
+    @Override
+    protected void handleCallback(@NotNull CallbackPayload callbackPayload) throws Exception {
+        final String key = keyTemplate.evaluateForPayload(callbackPayload);
 
-        final String key = keyTemplate.evaluateForPayload(payload);
-
-        if (payload.isDeleted())
+        if (callbackPayload.isDeleted())
             delete(key);
         else {
-            final java.nio.file.Path path;
+            final Path path;
 
-            final String hash = payload.getAfter();
-            final String owner = payload.getRepository().getOwner().getName();
-            final String repoName = payload.getRepository().getName();
+            final String hash = callbackPayload.getAfter();
+            final String owner = callbackPayload.getRepository().getOwner().getName();
+            final String repoName = callbackPayload.getRepository().getName();
 
             path = ghClient.download(owner, repoName, hash);
 
