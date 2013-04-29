@@ -8,6 +8,30 @@
     <artifactId>chancery</artifactId>
     <version>2.0-SNAPSHOT</version>
 
+
+    <name>Chancery</name>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Airbnb</name>
+        <url>http://nerds.airbnb.com/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <name>Pierre Carrier</name>
+            <email>pierre.carrier@airbnb.com</email>
+        </developer>
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>0.6.2</dropwizard.version>
