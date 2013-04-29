@@ -162,10 +162,10 @@ Here is an example for our story:
 
 ### Run it ###
 
-You'll need Java 7, the `chancery-1.1-SNAPSHOT.jar` überjar and a configuration
+You'll need Java 7, the `chancery-2.0-SNAPSHOT.jar` überjar and a configuration
 file.
 
-    $  java -jar chancery-1.1-SNAPSHOT.jar server /etc/chancery.yml
+    $  java -jar chancery-2.0-SNAPSHOT.jar server /etc/chancery.yml
 
 ### Monitor it ###
 
