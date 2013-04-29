@@ -9,10 +9,12 @@ import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.client.JerseyClientBuilder;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class ChanceryService extends Service<ChanceryConfig> {
     public static void main(String[] args) throws Exception {
         new ChanceryService().run(args);
@@ -63,8 +65,8 @@ public class ChanceryService extends Service<ChanceryConfig> {
 
         final List<RefLoggerConfig> refLoggerConfigs = config.getRefLogs();
         if (refLoggerConfigs != null)
-            /* TODO: some logging */
             for (RefLoggerConfig refLoggerConfig : refLoggerConfigs) {
+                log.info("Creating ref logger for {}", refLoggerConfig);
                 final RefLogger refLogger = new RefLogger(refLoggerConfig, ghClient);
                 callbackBus.register(refLogger);
             }
@@ -74,7 +76,7 @@ public class ChanceryService extends Service<ChanceryConfig> {
             final AmazonS3Client s3Client = buildS3Client(config);
 
             for (S3ArchiverConfig s3ArchiverConfig : s3ArchiverConfigs) {
-                /* TODO: some logging */
+                log.info("Creating S3 archiver for {}", s3ArchiverConfig);
 
                 final String bucketName = s3ArchiverConfig.getBucketName();
 
