@@ -32,5 +32,6 @@ public class RefLogger extends FilteringSubscriber {
 
         log.info("Creating ref {} to {} in {}/{}", ref, hash, owner, repoName);
         ghClient.createReference(owner, repoName, ref, hash);
+        log.info("Created ref {} to {} in {}/{}", ref, hash, owner, repoName);
     }
 }
