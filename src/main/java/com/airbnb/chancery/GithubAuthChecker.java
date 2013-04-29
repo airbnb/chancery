@@ -23,13 +23,23 @@ public class GithubAuthChecker {
         mac.init(signingKey);
     }
 
-    boolean checkSignature(@Nullable String mac, @NotNull String payload) {
-        if (mac == null || mac.length() != 40)
+    /**
+     * Checks a github signature against its payload
+     * @param signature A X-Hub-Signature header value ("sha1=[...]")
+     * @param payload The signed HTTP request body
+     * @return Whether the signature is correct for the checker's secret
+     */
+    boolean checkSignature(@Nullable String signature, @NotNull String payload) {
+        if (signature == null || signature.length() != 45)
             return false;
 
-        final char[] correct = Hex.encodeHex(this.mac.doFinal(payload.getBytes()));
+        final char[] hash = Hex.encodeHex(this.mac.doFinal(payload.getBytes()));
 
-        log.debug("Comparing {} and {}", correct, mac);
-        return Arrays.equals(correct, mac.toCharArray());
+        final StringBuilder builder = new StringBuilder("sha1=");
+        builder.append(hash);
+        final String expected = builder.toString();
+
+        log.debug("Comparing {} and {}", expected, signature);
+        return expected.equals(signature);
     }
 }
