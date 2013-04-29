@@ -8,7 +8,7 @@ public class S3ClientHealthCheck extends HealthCheck {
     private final String bucket;
 
     protected S3ClientHealthCheck(AmazonS3Client client, String bucket) {
-        super("s3");
+        super("s3: " + bucket);
         this.client = client;
         this.bucket = bucket;
     }
