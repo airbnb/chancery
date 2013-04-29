@@ -136,15 +136,15 @@ Here is an example for our story:
     awsSecretKey: YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 
     s3Archives:
-      - refFilter:   https://github.com/acme/project-(manhattan|brooklyn):refs/heads/prod/.*
+      - refFilter:   https://github\.com/acme/project-(manhattan|brooklyn):refs/heads/prod/.*
         bucketName:  deployment.acme.com
         keyTemplate: repos/@{repository.name}/@{ref}
-      - refFilter:   https://github.com/acme/.*:refs/(heads/prod|tags)/.*
+      - refFilter:   https://github\.com/acme/.*:refs/(heads/prod|tags)/.*
         bucketName:  archive.acme.com
         keyTemplate: repos/@{repository.name}/@{ref}:@{timestamp}
 
     refLogs:
-      - refFilter:   https://github.com/acme/.*:refs/(heads|tags)
+      - refFilter:   https://github\.com/acme/.*:refs/(heads|tags)
         refTemplate: 'refs/history/@{ref}/@{dtf.forPattern("yyyy/MM/dd/HH/mm/ss").print(timestamp)}'
 
     # Github can be very slow.
