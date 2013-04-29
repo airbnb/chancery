@@ -2,6 +2,8 @@ package com.airbnb.chancery;
 
 import com.airbnb.chancery.model.RateLimitStats;
 import com.airbnb.chancery.model.ReferenceCreationRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import java.nio.file.StandardCopyOption;
 @Slf4j
 public class GithubClient {
     private final WebResource resource;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {
         client.setFollowRedirects(true);
@@ -53,7 +56,8 @@ public class GithubClient {
     public RateLimitStats getRateLimitData()
             throws GithubFailure.forRateLimit {
         try {
-            return resource.uri(new URI("/rate_limit")).
+            return resource.
+                    uri(new URI("/rate_limit")).
                     accept(MediaType.APPLICATION_JSON_TYPE).
                     get(RateLimitStats.Container.class).getRate();
         } catch (URISyntaxException e) {
@@ -64,20 +68,22 @@ public class GithubClient {
     }
 
     public void createReference(String owner, String repository, String ref, String id)
-            throws GithubFailure.forRateLimit {
+            throws GithubFailure.forReferenceCreation {
         final URI uri = UriBuilder.
-                fromPath("/repos/{a}/{b}/git/{c}").
-                build(owner, repository, ref);
+                fromPath("/repos/{a}/{b}/git/refs").
+                build(owner, repository);
 
         final ReferenceCreationRequest req = new ReferenceCreationRequest(ref, id);
 
         try {
+            /* Github wants a Content-Length, and Jersey doesn't fancy doing that */
+            final byte[] payload = mapper.writeValueAsBytes(req);
+
             resource.uri(uri).
-                    accept(MediaType.APPLICATION_JSON_TYPE).
-                    entity(req, MediaType.APPLICATION_JSON_TYPE).
-                    post(ReferenceCreationRequest.class);
-        } catch (UniformInterfaceException e) {
-            throw new GithubFailure.forRateLimit(e);
+                    type(MediaType.APPLICATION_JSON_TYPE).
+                    post(payload);
+        } catch (JsonProcessingException | UniformInterfaceException e) {
+            throw new GithubFailure.forReferenceCreation(e);
         }
     }
 
