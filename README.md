@@ -194,7 +194,7 @@ You'll need to create the Github web hooks with your own user, as the
                   "config": {
                     "content_type": "json",
                     "secret": "airbnb <3 github :)",
-                    "url": "https://chancery.ewr.corp.acme.com/callback",
+                    "url": "https://chancery.ewr.corp.acme.com/callback"
                   }
                 }' \
         https://api.github.com/repos/acme/project-manhattan/hooks
