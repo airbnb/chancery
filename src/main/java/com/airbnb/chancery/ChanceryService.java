@@ -11,6 +11,7 @@ import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -74,20 +75,16 @@ public class ChanceryService extends Service<ChanceryConfig> {
         final List<S3ArchiverConfig> s3ArchiverConfigs = config.getS3Archives();
         if (s3ArchiverConfigs != null) {
             final AmazonS3Client s3Client = buildS3Client(config);
+            final HashSet<String> buckets = new HashSet<>();
 
             for (S3ArchiverConfig s3ArchiverConfig : s3ArchiverConfigs) {
                 log.info("Creating S3 archiver for {}", s3ArchiverConfig);
-
-                final String bucketName = s3ArchiverConfig.getBucketName();
-
-                final S3ClientHealthCheck healthCheck =
-                        new S3ClientHealthCheck(s3Client, bucketName);
-                env.addHealthCheck(healthCheck);
-
-                final S3Archiver s3Archiver =
-                        new S3Archiver(s3ArchiverConfig, s3Client, ghClient);
-                callbackBus.register(s3Archiver);
+                callbackBus.register(new S3Archiver(s3ArchiverConfig, s3Client, ghClient));
+                buckets.add(s3ArchiverConfig.getBucketName());
             }
+
+            for (String bucketName : buckets)
+                env.addHealthCheck(new S3ClientHealthCheck(s3Client, bucketName));
         }
 
         final CallbackResource resource = new CallbackResource(ghAuthChecker, callbackBus);
