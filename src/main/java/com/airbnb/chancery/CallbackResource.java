@@ -30,7 +30,7 @@ public class CallbackResource {
     @POST
     @Metered
     @ExceptionMetered
-    @Timed(name = "receiveHook")
+    @Timed
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response receiveHook(@HeaderParam("X-Hub-Signature") String signature,
