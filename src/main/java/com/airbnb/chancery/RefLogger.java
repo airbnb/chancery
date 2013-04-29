@@ -23,7 +23,8 @@ public class RefLogger {
 
     @Subscribe
     @AllowConcurrentEvents
-    private void receiveCallback(@NotNull CallbackPayload payload) throws GithubFailure.forRateLimit {
+    public void receiveCallback(@NotNull CallbackPayload payload)
+            throws GithubFailure.forReferenceCreation {
         if (!refFilter.matches(payload))
             return;
 
@@ -36,7 +37,7 @@ public class RefLogger {
         final String owner = repo.getOwner().getName();
         final String repoName = repo.getName();
 
-        log.info("Creating ref {} to {} in in {}/{}", ref, hash, owner, repoName);
+        log.info("Creating ref {} to {} in {}/{}", ref, hash, owner, repoName);
         ghClient.createReference(owner, repoName, ref, hash);
     }
 }
