@@ -57,9 +57,6 @@ public class CallbackResource {
         else
             callbackBus.post(decodedPayload);
 
-        return Response.ok().build();
-    }
-
-    private static class InvalidPayloadException extends Exception {
+        return Response.status(Response.Status.ACCEPTED).build();
     }
 }
