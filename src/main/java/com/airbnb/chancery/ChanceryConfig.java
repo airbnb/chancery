@@ -15,7 +15,6 @@ import java.util.List;
 public class ChanceryConfig extends Configuration {
     /* Needed */
     @Getter
-    @NotEmpty
     @JsonProperty
     private int handlerThreads = 16;
 
