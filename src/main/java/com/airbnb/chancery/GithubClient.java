@@ -6,6 +6,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.Timer;
+import com.yammer.metrics.core.TimerContext;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
@@ -19,6 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class GithubClient {
@@ -26,6 +31,12 @@ public class GithubClient {
     private final WebResource resource;
     @NotNull
     private final ObjectMapper mapper = new ObjectMapper();
+    @NonNull
+    private final Timer downloadTimer = Metrics.newTimer(getClass(), "download",
+            TimeUnit.SECONDS, TimeUnit.SECONDS);
+    @NonNull
+    private final Timer referenceCreationTimer = Metrics.newTimer(getClass(), "create-reference",
+            TimeUnit.SECONDS, TimeUnit.SECONDS);
 
     GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {
         client.setFollowRedirects(true);
@@ -77,6 +88,7 @@ public class GithubClient {
 
         final ReferenceCreationRequest req = new ReferenceCreationRequest(ref, id);
 
+        final TimerContext time = referenceCreationTimer.time();
         try {
             /* Github wants a Content-Length, and Jersey doesn't fancy doing that */
             final byte[] payload = mapper.writeValueAsBytes(req);
@@ -86,6 +98,8 @@ public class GithubClient {
                     post(payload);
         } catch (JsonProcessingException | UniformInterfaceException e) {
             throw new GithubFailure.forReferenceCreation(e);
+        } finally {
+            time.stop();
         }
     }
 
@@ -100,6 +114,7 @@ public class GithubClient {
 
         log.info("Downloading {}", uri);
 
+        final TimerContext time = downloadTimer.time();
         try {
             final InputStream inputStream = resource.uri(uri).
                     accept(MediaType.WILDCARD_TYPE).
@@ -110,6 +125,8 @@ public class GithubClient {
             return tempPath;
         } catch (UniformInterfaceException e) {
             throw new GithubFailure.forDownload(e);
+        } finally {
+            time.stop();
         }
     }
 }
