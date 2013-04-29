@@ -27,10 +27,9 @@ public class CallbackResource {
     private final EventBus callbackBus;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @POST
-    @Metered
     @ExceptionMetered
-    @Timed
+    @Metered
+    @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response receiveHook(@HeaderParam("X-Hub-Signature") String signature,
