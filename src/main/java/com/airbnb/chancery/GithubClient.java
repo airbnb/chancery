@@ -105,7 +105,7 @@ public class GithubClient {
 
     public Path download(String owner, String repository, String id)
             throws IOException, GithubFailure.forDownload {
-        final Path tempPath = Files.createTempFile("com.airbnb.chancery", null);
+        final Path tempPath = Files.createTempFile("com.airbnb.chancery-githubdownload-", null);
         tempPath.toFile().deleteOnExit();
 
         final URI uri = UriBuilder.
