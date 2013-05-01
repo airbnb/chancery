@@ -153,6 +153,8 @@ Here is an example for our story:
       connectionTimeout: 10s
       maxConnectionsPerRoute: 16
       keepAlive: 60s
+      # Github's nginx servers require this (or you'll get 411)
+      gzipEnabledForRequests: false
     
     # Log ALL before opening an issue please
     logging:
