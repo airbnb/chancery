@@ -93,7 +93,8 @@ and/or tags of which repositories should be acted upon.
           [...]
         }
 
-3. Create an bots team with "Pull only" permissions, give it access to the repositories to observe. Add `acme-chancery` to that team.
+3. Give the bot access to the repositories. We suggest using a team.
+   "Pull-only" is enough for S3 tarballs, but "Push & Pull" is needed for reflogs.
 
 #### AWS (only if you want S3 tarballs) ####
 
@@ -145,7 +146,7 @@ Here is an example for our story:
 
     refLogs:
       - refFilter:   https://github\.com/acme/.*:refs/(heads|tags)
-        refTemplate: 'refs/history/@{ref}/@{dtf.forPattern("yyyy/MM/dd/HH/mm/ss").print(timestamp)}'
+        refTemplate: 'refs/history/@{ref.substring(5)}/@{dtf.forPattern("yyyy/MM/dd/HH/mm/ss").print(timestamp)}'
 
     # Github can be very slow.
     githubHttpConfig:
