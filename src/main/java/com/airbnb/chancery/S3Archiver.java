@@ -2,11 +2,14 @@ package com.airbnb.chancery;
 
 import com.airbnb.chancery.model.CallbackPayload;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.format.ISODateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.io.File;
@@ -57,7 +60,7 @@ public class S3Archiver extends FilteringSubscriber {
 
 
             path = ghClient.download(owner, repoName, hash);
-            upload(path.toFile(), key);
+            upload(path.toFile(), key, callbackPayload);
 
             try {
                 Files.delete(path);
@@ -82,11 +85,17 @@ public class S3Archiver extends FilteringSubscriber {
         log.info("Deleted {} from {}", key, bucketName);
     }
 
-    private void upload(@NotNull File src, @NotNull String key) {
+    private void upload(@NotNull File src, @NotNull String key, CallbackPayload payload) {
         log.info("Uploading {} to {} in {}", src, key, bucketName);
+        final PutObjectRequest request = new PutObjectRequest(bucketName, key, src);
+        final ObjectMetadata metadata = request.getMetadata();
+        metadata.addUserMetadata("commit-id", payload.getAfter());
+        metadata.addUserMetadata("hook-timestamp",
+                ISODateTimeFormat.basicTime().print(payload.getTimestamp()));
+
         final TimerContext time = uploadTimer.time();
         try {
-            s3Client.putObject(this.bucketName, key, src);
+            s3Client.putObject(request);
         } catch (Exception e) {
             log.error("Couldn't upload to {} in {}", key, bucketName, e);
             throw e;
