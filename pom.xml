@@ -32,6 +32,15 @@
         </developer>
     </developers>
 
+    <contributors>
+        <!--
+        <contributor>
+            <name>John Doe</name>
+            <email>john.doe@example.com</name>
+        </contributor>
+        -->
+    </contributors>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>0.6.2</dropwizard.version>
@@ -43,6 +52,7 @@
         <jar.version>2.4</jar.version>
         <java.version>1.7</java.version>
         <joda.version>2.2</joda.version>
+        <rabbitmq.version>3.0.4</rabbitmq.version>
     </properties>
 
     <dependencies>
@@ -62,6 +72,12 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
             <version>${amazon.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${rabbitmq.version}</version>
         </dependency>
 
         <dependency>

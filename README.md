@@ -211,6 +211,15 @@ matches your particular needs.
 Open issues, send pull requests, share your love with
 [@AirbnbNerds](https://twitter.com/AirbnbNerds) on Twitter!
 
+### Code? ###
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Add yourself to the contributors in `pom.xml`
+4. Commit your changes (`git commit -am 'Add some feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
+
 ### Local development ###
 
 Live-testing Github callbacks from your development machine could be a bit painful.
