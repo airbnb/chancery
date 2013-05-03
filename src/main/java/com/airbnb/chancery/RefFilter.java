@@ -19,6 +19,7 @@ public class RefFilter {
         final boolean matches = pattern.matcher(format(payload)).matches();
         log.debug("{} matched against {}, {}", payload, pattern, matches);
         return matches;
+        return matches;
     }
 
     private String format(CallbackPayload payload) {

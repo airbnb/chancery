@@ -3,7 +3,9 @@ package com.airbnb.chancery.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NonNull;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -19,6 +21,7 @@ public class Commit {
     private /* final */ Entity committer;
     @JsonProperty
     private /* final */ boolean distinct;
+    @NotNull
     @JsonProperty
     private /* final */ String id;
     @JsonProperty
