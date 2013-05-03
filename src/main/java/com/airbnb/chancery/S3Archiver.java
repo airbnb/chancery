@@ -10,6 +10,7 @@ import com.yammer.metrics.core.TimerContext;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.io.File;
@@ -43,6 +44,11 @@ public class S3Archiver extends FilteringSubscriber {
         this.ghClient = ghClient;
         bucketName = config.getBucketName();
         keyTemplate = new PayloadExpressionEvaluator(config.getKeyTemplate());
+    }
+
+    @Override
+    Logger getLogger() {
+        return log;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
 import lombok.Getter;
 import lombok.NonNull;
+import org.slf4j.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,8 @@ public abstract class FilteringSubscriber {
                 "handled-callbacks",
                 TimeUnit.SECONDS, TimeUnit.SECONDS);
     }
+
+    abstract Logger getLogger();
 
     protected abstract void handleCallback(@NotNull CallbackPayload callbackPayload)
             throws Exception;

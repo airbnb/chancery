@@ -2,9 +2,11 @@ package com.airbnb.chancery;
 
 import com.airbnb.chancery.model.CallbackPayload;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.regex.Pattern;
 
+@Slf4j
 public class RefFilter {
     @NonNull
     private final Pattern pattern;
@@ -14,7 +16,9 @@ public class RefFilter {
     }
 
     public boolean matches(CallbackPayload payload) {
-        return pattern.matcher(format(payload)).matches();
+        final boolean matches = pattern.matcher(format(payload)).matches();
+        log.debug("{} matched against {}, {}", payload, pattern, matches);
+        return matches;
     }
 
     private String format(CallbackPayload payload) {

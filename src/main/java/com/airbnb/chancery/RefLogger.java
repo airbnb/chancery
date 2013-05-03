@@ -5,6 +5,7 @@ import com.airbnb.chancery.model.Repository;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +18,11 @@ public class RefLogger extends FilteringSubscriber {
         super(config.getRefFilter());
         this.ghClient = ghClient;
         refTemplate = new PayloadExpressionEvaluator(config.getRefTemplate());
+    }
+
+    @Override
+    Logger getLogger() {
+        return log;
     }
 
     @Override
