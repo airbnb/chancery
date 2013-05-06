@@ -1,0 +1,326 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Chancery by airbnb</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Chancery</h1>
+        <p>Automate on Github pushes</p>
+
+        <p class="view"><a href="https://github.com/airbnb/chancery">View the Project on GitHub <small>airbnb/chancery</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/airbnb/chancery/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/airbnb/chancery/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/airbnb/chancery">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Welcome to Chancery</h1>
+
+<p>Chancery hears when you push to Github, and allows you to…</p>
+
+<ul>
+<li>
+<p><strong>Deploy when github is down!</strong></p>
+
+<p>Chancery can send gzip'ped tarballs of your references of choice to an S3 bucket.</p>
+</li>
+<li>
+<p><strong>Keep track of your branches history!</strong> Even when Pierre force-pushed to <code>master</code>!</p>
+
+<p>A <code>reflog</code> for Github, more or less.</p>
+</li>
+</ul><p><em>Gratefully based on Java 7, Dropwizard, AWS SDK, MVEL2, Joda Time and lombok.</em></p>
+
+<p><strong>Table of Contents</strong></p>
+
+<ul>
+<li><a href="#what-it-does">What it does</a></li>
+<li>
+<a href="#set-it-up-one-time-operation">Set it up (one-time operation)</a>
+
+<ul>
+<li>
+<a href="#prepare-credentials">Prepare credentials</a>
+
+<ul>
+<li><a href="#github">Github</a></li>
+<li><a href="#aws-only-if-you-want-s3-tarballs">AWS (only if you want S3 tarballs)</a></li>
+</ul>
+</li>
+<li><a href="#build-it">Build it</a></li>
+<li><a href="#write-a-configuration-file">Write a configuration file</a></li>
+<li><a href="#run-it">Run it</a></li>
+<li><a href="#monitor-it">Monitor it</a></li>
+</ul>
+</li>
+<li><a href="#install-a-web-hook-needed-for-every-repository">Install a web hook (needed for every repository)</a></li>
+<li>
+<a href="#contribute">Contribute</a>
+
+<ul>
+<li><a href="#local-development">Local development</a></li>
+</ul>
+</li>
+</ul><h2>What it does</h2>
+
+<p>Whenever someone updates a reference (tag, branch, etc.) in a monitored repository,
+Github lets Chancery know through a web hook. If Github sent the right secret,
+Chancery will do its magic.</p>
+
+<p>You can configure a few backends, each of them have their own configuration.</p>
+
+<p>They usually start by trying to match <code>$REPO_URI:$REF</code> against their <code>refFilter</code>
+regular expression. This provides a limited but simple way to specify which branches
+and/or tags of which repositories should be acted upon.</p>
+
+<ul>
+<li>
+<p>For S3 tarballs, the web hook message is passed to the <code>keyTemplate</code> template.
+This template turns it into an "object key", which you can think of
+as the path of the tarball in your bucket.</p>
+
+<p>If the update deleted the reference, we delete the corresponding object;
+if the update changed the commit the reference points to, we let Github
+bake us a fresh gzip'ped tarball then put it there.</p>
+</li>
+<li><p>For ref logs, the web hook message is passed to the <code>refTemplate</code> template,
+and the resulting target reference is created.</p></li>
+</ul><p><strong>A few more things</strong> to note before we get started:</p>
+
+<ol>
+<li><p>References are always in their canonical form:
+a <code>v1.0</code> tag is <code>refs/tags/v1.0</code>,
+a <code>feature/cleartextpasswd</code> branch is <code>refs/heads/feature/cleartextpasswd</code>.</p></li>
+<li><p>The secret mechanism relies on a SHA1 HMAC and allows secure authentication of Github.
+HTTPS is however needed to hide the web hook payload from passive observers,
+and for protection against replay attacks.</p></li>
+<li>
+<p>Templates are all MVEL 2 string templates.
+Please look at their <a href="http://mvel.codehaus.org/MVEL+2.0+Templating+Guide">templating guide</a>
+for the syntax.</p>
+
+<p>A lot of information from the hook is usable there; please look at the sources
+of <code>CallbackPayload</code> or the Chancery debug logs.</p>
+
+<p>We added a <code>timestamp</code> attribute that matches when Chancery received the callback,
+and Joda Time's <code>ISODateTimeFormat</code> class is exposed as <code>iso</code>, <code>DateTimeFormat</code> as <code>dtf</code>.</p>
+</li>
+</ol><h2>Set it up (one-time operation)</h2>
+
+<h3>Prepare credentials</h3>
+
+<h4>Github</h4>
+
+<ol>
+<li><p>Create an <code>acme-chancery</code> github user.</p></li>
+<li>
+<p>Create an oAuth2 token for that user, keep it around:</p>
+
+<pre><code>$ curl \
+    --silent --fail \
+    --request POST \
+    --user 'acme-chancery:password123' \
+    -H 'Content-Type: application/json' \
+    --data '{ "scopes": ["repo"], "note": "chancery" }' \
+    https://api.github.com/authorizations
+{
+  [...]
+  "token": "1234567890abcdef1234567890abcdef12345678",
+  [...]
+}
+</code></pre>
+</li>
+<li><p>Give the bot access to the repositories. We suggest using a team.
+"Pull-only" is enough for S3 tarballs, but "Push &amp; Pull" is needed for reflogs.</p></li>
+</ol><h4>AWS (only if you want S3 tarballs)</h4>
+
+<ol>
+<li><p>Create an AMI user, keep its Access Key Id and Secret Access Key around.</p></li>
+<li>
+<p>Attach a user policy to it:</p>
+
+<pre><code>{"Statement":[{
+    "Action": ["s3:*"],
+    "Effect": "Allow",
+    "Resource": [
+        "arn:aws:s3:::deployment.acme.com/repos/*",
+        "arn:aws:s3:::archive.acme.com/repos/*"
+    ]
+}]}
+</code></pre>
+</li>
+</ol><h3>Build it</h3>
+
+<p>You'll need Java 7 and a recent version of Maven (only tested with Maven 3).</p>
+
+<pre><code>$ mvn package; ls -l target/chancery-1.0-SNAPSHOT.jar
+</code></pre>
+
+<h3>Write a configuration file</h3>
+
+<p>Dropwizard comes with many options, please refer to their documentation and
+<a href="https://github.com/codahale/dropwizard/blob/master/dropwizard-example/example.yml">commented example</a>.</p>
+
+<p>Here is an example for our story:</p>
+
+<pre><code># Defaults to 16
+handlerThreads: 32
+
+# Required
+githubOauth2Token: 1234567890abcdef1234567890abcdef12345678
+# Optional. You get to pick it, so we did:
+githubSecret: 'airbnb &lt;3 github :)'
+
+# Required for S3 tarballs
+awsAccessKeyID: XXXXXXXXXXXXXXXXXXXX
+awsSecretKey: YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+
+s3Archives:
+  - refFilter:   https://github\.com/acme/project-(manhattan|brooklyn):refs/heads/prod/.*
+    bucketName:  deployment.acme.com
+    keyTemplate: repos/@{repository.name}/@{ref}
+  - refFilter:   https://github\.com/acme/.*:refs/(heads/prod|tags)/.*
+    bucketName:  archive.acme.com
+    keyTemplate: repos/@{repository.name}/@{ref}:@{timestamp}
+
+refLogs:
+  - refFilter:   https://github\.com/acme/.*:refs/(heads|tags)
+    refTemplate: 'refs/history/@{ref.substring(5)}/@{dtf.forPattern("yyyy/MM/dd/HH/mm/ss").print(timestamp)}'
+
+# Github can be very slow.
+githubHttpConfig:
+  timeout: 20s
+  connectionTimeout: 10s
+  maxConnectionsPerRoute: 16
+  keepAlive: 60s
+  # Github's nginx servers require this (or you'll get 411)
+  gzipEnabledForRequests: false
+
+# Log ALL before opening an issue please
+logging:
+  console:
+    enabled: true
+    threshold: ALL
+</code></pre>
+
+<h3>Run it</h3>
+
+<p>You'll need Java 7, the <code>chancery-2.0-SNAPSHOT.jar</code> überjar and a configuration
+file.</p>
+
+<pre><code>$  java -jar chancery-2.0-SNAPSHOT.jar server /etc/chancery.yml
+</code></pre>
+
+<h3>Monitor it</h3>
+
+<p>The various monitoring endpoints are listed on the admin port (8081 by default).</p>
+
+<p>You'll a few basic health checks in <code>/healthcheck</code> and
+a bunch of metrics in <code>/metrics?pretty</code>;
+feel free to suggest more.</p>
+
+<p>Please remember that the metrics are JMX-friendly;
+the Dropwizard documentation is yet again of great help.</p>
+
+<h2>Install a web hook (needed for every repository)</h2>
+
+<p>You'll need to create the Github web hooks with your own user, as the
+<code>acme-chancery</code> doesn't have sufficient rights.</p>
+
+<pre><code>$ curl \
+    --silent --fail \
+    --request POST \
+    --user 'acme-root:god' \
+    -H 'Content-Type: application/json' \
+    --data '{
+              "name": "web",
+              "active": true,
+              "config": {
+                "content_type": "json",
+                "secret": "airbnb &lt;3 github :)",
+                "url": "https://chancery.ewr.corp.acme.com/callback"
+              }
+            }' \
+    https://api.github.com/repos/acme/project-manhattan/hooks
+</code></pre>
+
+<p>Then verify that the Chancery configuration file, in particular <code>refPattern</code>,
+matches your particular needs.</p>
+
+<h2>Contribute</h2>
+
+<p>Open issues, send pull requests, share your love with
+<a href="https://twitter.com/AirbnbNerds">@AirbnbNerds</a> on Twitter!</p>
+
+<h3>Code?</h3>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Add yourself to the contributors in <code>pom.xml</code>
+</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol><h3>Local development</h3>
+
+<p>Live-testing Github callbacks from your development machine could be a bit painful.
+Here is a trick.</p>
+
+<ul>
+<li>
+<p>On your publicly-accessible <code>server.acme.com</code>, make sure you allow gateway ports:</p>
+
+<pre><code>Match User johndoe
+    GatewayPorts yes
+</code></pre>
+
+<p>Restart <code>sshd</code> if needed.</p>
+</li>
+<li>
+<p>From your laptop, run:</p>
+
+<pre><code>laptop$ ssh -vNR 9000:localhost:8080 server.acme.com
+</code></pre>
+
+<p>Note that the <code>9000</code> port needs to be reachable from the outside on
+<code>server.acme.com</code>, but you do not need to open your laptop firewall as
+connections will come through the loopback interface.</p>
+</li>
+<li>
+<p>On your laptop, fire up a logging HTTP server, check that it receives requests:</p>
+
+<pre><code>$ python -mSimpleHTTPServer 8080 &amp;
+[1] 32430
+Serving HTTP on 0.0.0.0 port 8080 ...
+$ curl -sf http://server.acme.com:9000/ &gt;/dev/null
+127.0.0.1 - - [29/Apr/2013 02:08:48] "GET / HTTP/1.1" 200 -
+$ kill %%
+</code></pre>
+</li>
+<li><p>You can now ask Github to send callbacks to <code>http://server.acme.com:9000/</code>.</p></li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/airbnb">airbnb</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
