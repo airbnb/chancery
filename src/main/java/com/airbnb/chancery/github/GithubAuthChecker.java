@@ -1,4 +1,4 @@
-package com.airbnb.chancery;
+package com.airbnb.chancery.github;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
@@ -9,10 +9,9 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.validation.constraints.NotNull;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 @Slf4j
-public class GithubAuthChecker {
+public final class GithubAuthChecker {
     static final String HMAC_SHA1 = "HmacSHA1";
     final Mac mac;
 
@@ -29,7 +28,7 @@ public class GithubAuthChecker {
      * @param payload The signed HTTP request body
      * @return Whether the signature is correct for the checker's secret
      */
-    boolean checkSignature(@Nullable String signature, @NotNull String payload) {
+    public boolean checkSignature(@Nullable String signature, @NotNull String payload) {
         if (signature == null || signature.length() != 45)
             return false;
 

@@ -1,11 +1,11 @@
-package com.airbnb.chancery;
+package com.airbnb.chancery.github;
 
+import com.airbnb.chancery.GithubFailure;
 import com.airbnb.chancery.model.RateLimitStats;
 import com.airbnb.chancery.model.ReferenceCreationRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.*;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
@@ -26,8 +26,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class GithubClient {
-    @NotNull
+public final class GithubClient {
+    	@NotNull
     private final WebResource resource;
     @NotNull
     private final ObjectMapper mapper = new ObjectMapper();
@@ -38,29 +38,16 @@ public class GithubClient {
     private final Timer referenceCreationTimer = Metrics.newTimer(getClass(), "create-reference",
             TimeUnit.SECONDS, TimeUnit.SECONDS);
 
-    GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {
+    public GithubClient(final @NotNull Client client, final @Nullable String oAuth2Token) {
         client.setFollowRedirects(true);
 
         resource = client.resource("https://api.github.com/");
 
-        resource.addFilter(new ClientFilter() {
-            @Override
-            public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
-                /* Github API *requires* this */
-                cr.getHeaders().putSingle("User-Agent", "chancery by pierre@gcarrier.fr");
-                return getNext().handle(cr);
-            }
-        });
+        resource.addFilter(new UserAgentFilter());
 
         if (oAuth2Token != null && !oAuth2Token.isEmpty()) {
             final String authValue = "token " + oAuth2Token;
-            resource.addFilter(new ClientFilter() {
-                @Override
-                public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
-                    cr.getHeaders().putSingle("Authorization", authValue);
-                    return getNext().handle(cr);
-                }
-            });
+            resource.addFilter(new AuthorizationFilter(authValue));
         } else {
             GithubClient.log.warn("No Github oAuth2 token provided");
         }

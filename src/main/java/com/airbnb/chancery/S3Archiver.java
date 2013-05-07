@@ -1,5 +1,6 @@
 package com.airbnb.chancery;
 
+import com.airbnb.chancery.github.GithubClient;
 import com.airbnb.chancery.model.CallbackPayload;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -113,7 +114,7 @@ public class S3Archiver extends FilteringSubscriber {
             log.error("Couldn't upload to {} in {}", key, bucketName, e);
             throw e;
         } finally {
-            uploadTimer.stop();
+            time.stop();
         }
         log.info("Uploaded to {} in {}", key, bucketName);
     }

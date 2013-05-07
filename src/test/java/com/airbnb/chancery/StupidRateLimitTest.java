@@ -1,5 +1,6 @@
 package com.airbnb.chancery;
 
+import com.airbnb.chancery.github.GithubClient;
 import com.airbnb.chancery.model.RateLimitStats;
 import com.sun.jersey.api.client.Client;
 import lombok.extern.slf4j.Slf4j;

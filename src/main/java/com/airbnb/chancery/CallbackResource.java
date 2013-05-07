@@ -1,11 +1,11 @@
 package com.airbnb.chancery;
 
+import com.airbnb.chancery.github.GithubAuthChecker;
 import com.airbnb.chancery.model.CallbackPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.EventBus;
 import com.yammer.metrics.annotation.ExceptionMetered;
 import com.yammer.metrics.annotation.Metered;
-import com.yammer.metrics.annotation.Timed;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class CallbackResource {
     public Response receiveHook(@HeaderParam("X-Hub-Signature") String signature,
                                 String payload)
             throws IOException, GithubFailure.forDownload {
-        CallbackResource.log.debug("Received {}", payload);
+        log.debug("Received {}", payload);
 
         CallbackPayload decodedPayload;
 

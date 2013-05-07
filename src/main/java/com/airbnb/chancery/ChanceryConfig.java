@@ -5,15 +5,16 @@ import com.yammer.dropwizard.client.JerseyClientConfiguration;
 import com.yammer.dropwizard.config.Configuration;
 import com.yammer.dropwizard.validation.ValidationMethod;
 import lombok.Data;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper=true)
 public class ChanceryConfig extends Configuration {
     /* Needed */
     @JsonProperty

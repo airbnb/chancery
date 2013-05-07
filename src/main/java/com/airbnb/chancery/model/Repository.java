@@ -7,46 +7,46 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Repository {
-    @JsonProperty
-    private /* final */ int id;
-    @JsonProperty
-    private /* final */ int watchers;
-    @JsonProperty
-    private /* final */ int stargazers;
-    @JsonProperty
-    private /* final */ String url;
-    @JsonProperty
-    private /* final */ int size;
-    @JsonProperty("has_wiki")
-    private /* final */ boolean wiki;
-    @JsonProperty("has_issues")
-    private /* final */ boolean issues;
-    @JsonProperty("has_downloads")
-    private /* final */ boolean downloads;
-    @JsonProperty
-    private /* final */ int forks;
-    @JsonProperty
-    private /* final */ boolean fork;
-    @JsonProperty
-    private /* final */ String description;
-    @JsonProperty("created_at")
-    private /* final */ int createdAt;
-    @JsonProperty
-    private /* final */ String language;
-    @JsonProperty("master_branch")
-    private /* final */ String masterBranch;
-    @JsonProperty
-    private /* final */ String name;
-    @JsonProperty("open_issues")
-    private /* final */ int openIssues;
-    @JsonProperty
-    private /* final */ String organization;
-    @JsonProperty("private")
-    private /* final */ boolean privateRepo;
-    @JsonProperty
-    private /* final */ int pushed_at;
-    @JsonProperty
-    private /* final */ Entity owner;
-    @JsonProperty
-    private /* final */ String homepage;
+	@JsonProperty
+	private int id;
+	@JsonProperty
+	private int watchers;
+	@JsonProperty
+	private int stargazers;
+	@JsonProperty
+	private String url;
+	@JsonProperty
+	private int size;
+	@JsonProperty("has_wiki")
+	private boolean wiki;
+	@JsonProperty("has_issues")
+	private boolean issues;
+	@JsonProperty("has_downloads")
+	private boolean downloads;
+	@JsonProperty
+	private int forks;
+	@JsonProperty
+	private boolean fork;
+	@JsonProperty
+	private String description;
+	@JsonProperty("created_at")
+	private int createdAt;
+	@JsonProperty
+	private String language;
+	@JsonProperty("master_branch")
+	private String masterBranch;
+	@JsonProperty
+	private String name;
+	@JsonProperty("open_issues")
+	private int openIssues;
+	@JsonProperty
+	private String organization;
+	@JsonProperty("private")
+	private boolean privateRepo;
+	@JsonProperty
+	private int pushed_at;
+	@JsonProperty
+	private Entity owner;
+	@JsonProperty
+	private String homepage;
 }

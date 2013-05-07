@@ -10,7 +10,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReferenceCreationRequest {
     @JsonProperty("ref")
-    private /* final */ String name;
+    private String name;
     @JsonProperty
-    private /* final */ String sha;
+    private String sha;
 }

@@ -12,31 +12,31 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CallbackPayload {
-    @JsonProperty
-    @NotNull
-    private /* final */ Repository repository;
-    @JsonProperty
-    @NotNull
-    private /* final */ String ref;
-    @JsonProperty
-    private /* final */ Entity pusher;
-    @JsonProperty
-    @NotNull
-    private /* final */ String after;
-    @JsonProperty
-    private /* final */ String before;
-    @JsonProperty
-    private /* final */ String compare;
-    @JsonProperty
-    private /* final */ boolean created;
-    @JsonProperty
-    private /* final */ boolean deleted;
-    @JsonProperty
-    private /* final */ boolean forced;
-    @JsonProperty("head_commit")
-    private /* final */ Commit headCommit;
-    @JsonProperty
-    private /* final */ List<Commit> commits;
-    @JsonIgnore
-    private /* final */ DateTime timestamp;
+	@JsonProperty
+	@NotNull
+	private Repository repository;
+	@JsonProperty
+	@NotNull
+	private String ref;
+	@JsonProperty
+	private Entity pusher;
+	@JsonProperty
+	@NotNull
+	private String after;
+	@JsonProperty
+	private String before;
+	@JsonProperty
+	private String compare;
+	@JsonProperty
+	private boolean created;
+	@JsonProperty
+	private boolean deleted;
+	@JsonProperty
+	private boolean forced;
+	@JsonProperty("head_commit")
+	private Commit headCommit;
+	@JsonProperty
+	private List<Commit> commits;
+	@JsonIgnore
+	private DateTime timestamp;
 }

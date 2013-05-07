@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Entity {
-    @JsonProperty
-    private /* final */ String name;
-    @JsonProperty
-    private /* final */ String username;
-    @JsonProperty
-    private /* final */ String email;
+	@JsonProperty
+	private String name;
+	@JsonProperty
+	private String username;
+	@JsonProperty
+	private String email;
 }
