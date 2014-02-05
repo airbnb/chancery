@@ -32,15 +32,6 @@
         </developer>
     </developers>
 
-    <contributors>
-        <!--
-        <contributor>
-            <name>John Doe</name>
-            <email>john.doe@example.com</name>
-        </contributor>
-        -->
-    </contributors>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>0.6.2</dropwizard.version>
